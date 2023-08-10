@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46ae2036d0d5e3240bdc048d55ba2d6c, type: 3}
   m_Name: City
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 21300000, guid: 5d007acdb83f56b459687c69086ce393, type: 3}
-  m_Color: {r: 0.16981131, g: 0.16981131, b: 0.16981131, a: 1}
+  m_Sprite: {fileID: 21300000, guid: c90b9d5517a9a6f4c8e4b74242949b82, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
     e01: 0
@@ -32,6 +32,6 @@ MonoBehaviour:
     e32: 0
     e33: 1
   m_InstancedGameObject: {fileID: 0}
-  m_Flags: 1
+  m_Flags: 0
   m_ColliderType: 1
   terrain: 4

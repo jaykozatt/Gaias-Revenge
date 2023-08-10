@@ -1,19 +1,23 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Pieces", menuName = "ScriptableObjects/Pieces", order = 0), ExecuteInEditMode] 
 public class Pieces : ScriptableObject 
 {
-    public GameObject[] list;
+    private GameObject _template;
+    public List<GameObject> list;
 
     public GameObject GetRandom()
     {
-        int value = Random.Range(0, list.Length);
+        int value = Random.Range(0, list.Count);
         return list[value];
     }
 
     private void OnValidate() {
-        list = Resources.LoadAll<GameObject>("Placeables");
+        _template = Resources.Load<GameObject>("Placeables/Template");
+        list = new List<GameObject>(Resources.LoadAll<GameObject>("Placeables"));
+        list.Remove(_template);
     }
 
 }

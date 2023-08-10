@@ -10,10 +10,11 @@ public class Dragable : MonoBehaviour
     }
 
     protected virtual void OnMouseDown() {
-        print($"Draging: {gameObject.name}");
-        mousePositionOffset = transform.position - MouseWorldPosition;
+        if (enabled)
+            mousePositionOffset = transform.position - MouseWorldPosition;
     }
     protected virtual void OnMouseDrag() {
-        transform.position = MouseWorldPosition + mousePositionOffset;
+        if (enabled)
+            transform.position = MouseWorldPosition + mousePositionOffset;
     }
 }

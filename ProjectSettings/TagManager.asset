@@ -41,9 +41,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Placeables
-    uniqueID: 632768037
-    locked: 0
   - name: UI
     uniqueID: 3358231503
+    locked: 0
+  - name: Placeables
+    uniqueID: 632768037
     locked: 0

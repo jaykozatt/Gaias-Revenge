@@ -13,77 +13,132 @@ public class Placeable : Dragable
         _dispenser = dispenser;
     }
 
+    private void OnMouseEnter() {
+        if (enabled && GameManager.Instance.gameState == GameState.TurnPlayer)
+        {
+            Vector3Int cellPosition;
+            for (int y = _cellBounds.yMin; y < _cellBounds.yMax; y++)
+            {
+                for (int x = _cellBounds.xMin; x < _cellBounds.xMax; x++)
+                {
+                    cellPosition = new Vector3Int(x,y,0);
+                    _tilemap.SetColor(cellPosition, Color.yellow);   
+                }
+            }
+        }
+
+    }
+    private void OnMouseExit() {
+        if (enabled && GameManager.Instance.gameState == GameState.TurnPlayer)
+        {
+            Vector3Int cellPosition;
+            for (int y = _cellBounds.yMin; y < _cellBounds.yMax; y++)
+            {
+                for (int x = _cellBounds.xMin; x < _cellBounds.xMax; x++)
+                {
+                    cellPosition = new Vector3Int(x,y,0);
+                    _tilemap.SetColor(cellPosition, Color.white);   
+                }
+            }
+        }
+    }
 
     protected override void OnMouseDown()
     {
-        base.OnMouseDown();
-        _originalPosition = transform.position;
-        _tilemap.CompressBounds();
-        _tilemap.tileAnchor += .75f * Vector3.forward;
-        GameBoard.Instance.EnableHelperGrid();
+        if (enabled && GameManager.Instance.gameState == GameState.TurnPlayer)
+        {
+            base.OnMouseDown();
+            _originalPosition = transform.position;
+            _tilemap.CompressBounds();
+            _tilemap.tileAnchor += .75f * Vector3.forward;
+            GameBoard.Instance.EnableHelperGrid();
+
+            Vector3Int cellPosition;
+            for (int y = _cellBounds.yMin; y < _cellBounds.yMax; y++)
+            {
+                for (int x = _cellBounds.xMin; x < _cellBounds.xMax; x++)
+                {
+                    cellPosition = new Vector3Int(x,y,0);
+                    _tilemap.SetColor(cellPosition, Color.white);   
+                }
+            }
+        }
     }
 
     protected override void OnMouseDrag() 
     {
-        base.OnMouseDrag();    
-        GameBoard.Instance.ClearTemp();
-
-        TerrainTile tile;
-        Vector3 tileWorldPosition;
-        Vector3Int cellPosition;
-        for (int y = _cellBounds.yMin; y < _cellBounds.yMax; y++)
+        if (enabled && GameManager.Instance.gameState == GameState.TurnPlayer)
         {
-            for (int x = _cellBounds.xMin; x < _cellBounds.xMax; x++)
-            {
-                cellPosition = new Vector3Int(x,y,0);
-                tileWorldPosition = _tilemap.CellToWorld(cellPosition);
+            base.OnMouseDrag();    
+            GameBoard.Instance.ClearTemp();
 
-                tile = _tilemap.GetTile<TerrainTile>(cellPosition);
-                
-                if (GameBoard.Instance.Validate(tileWorldPosition, tile))
-                    _tilemap.SetColor(cellPosition, Color.green);
-                else
-                    _tilemap.SetColor(cellPosition, Color.red);   
+            TerrainTile tile;
+            Vector3 tileWorldPosition;
+            Vector3Int cellPosition;
+            for (int y = _cellBounds.yMin; y < _cellBounds.yMax; y++)
+            {
+                for (int x = _cellBounds.xMin; x < _cellBounds.xMax; x++)
+                {
+                    cellPosition = new Vector3Int(x,y,0);
+                    tileWorldPosition = _tilemap.CellToWorld(cellPosition);
+
+                    tile = _tilemap.GetTile<TerrainTile>(cellPosition);
+                    
+                    if (GameBoard.Instance.Validate(tileWorldPosition, tile))
+                        _tilemap.SetColor(cellPosition, Color.green);
+                    else
+                        _tilemap.SetColor(cellPosition, Color.red);   
+                }
             }
         }
     }
 
     private void OnMouseUp() 
     {
-        Vector3 tileWorldPosition;
-        Vector3Int cellPosition;
-        TerrainTile tile;
-        bool anyTileWasPlaced = false;
-
-        for (int y = _cellBounds.yMin; y < _cellBounds.yMax; y++)
+        if (enabled && GameManager.Instance.gameState == GameState.TurnPlayer)
         {
-            for (int x = _cellBounds.xMin; x < _cellBounds.xMax; x++)
+            Vector3 tileWorldPosition;
+            Vector3Int cellPosition;
+            TerrainTile tile;
+            bool anyTileWasPlaced = false;
+
+            for (int y = _cellBounds.yMin; y < _cellBounds.yMax; y++)
             {
-                cellPosition = new Vector3Int(x,y,0);
-                tileWorldPosition = _tilemap.CellToWorld(cellPosition);
-                tile = _tilemap.GetTile<TerrainTile>(cellPosition);
-
-                if (tile != null)
+                for (int x = _cellBounds.xMin; x < _cellBounds.xMax; x++)
                 {
-                    GameBoard.Instance.Submit(tileWorldPosition, tile);  
-                    anyTileWasPlaced = true;
+                    cellPosition = new Vector3Int(x,y,0);
+                    tileWorldPosition = _tilemap.CellToWorld(cellPosition);
+                    tile = _tilemap.GetTile<TerrainTile>(cellPosition);
+
+                    if (tile != null && GameBoard.Instance.Validate(tileWorldPosition,tile))
+                    {
+                        GameBoard.Instance.Submit(tileWorldPosition, tile);  
+                        anyTileWasPlaced = true;
+                    }
+                    else
+                    {
+                        _tilemap.SetColor(cellPosition, Color.white);
+                    }
+
+                    GameBoard.Instance.ClearTemp();
                 }
-
-                GameBoard.Instance.ClearTemp();
             }
-        }
 
-        GameBoard.Instance.EnableHelperGrid(false);
-        _tilemap.tileAnchor -= .75f * Vector3.forward;
+            GameBoard.Instance.EnableHelperGrid(false);
+            _tilemap.tileAnchor -= .75f * Vector3.forward;
 
-        if (anyTileWasPlaced) 
-        {
-            _dispenser?.DeployNext();
-            Destroy(gameObject);
-        }
-        else 
-        {
-            transform.position = _originalPosition;
+            if (anyTileWasPlaced) 
+            {
+                _dispenser?.DeployNext();
+                Destroy(gameObject);
+
+                if (GameBoard.Instance.UnclaimedTiles > 0 && GameManager.Instance.gameState < GameState.GameEnded)
+                    GameManager.Instance.AdvanceTurn();
+            }
+            else 
+            {
+                transform.position = _originalPosition;
+            }
         }
     }    
 
